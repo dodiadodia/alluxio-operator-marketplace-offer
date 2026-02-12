@@ -97,7 +97,7 @@ spec:
               mountPath: /etc/localtime
             {{- end }}
         - name: node-driver-registrar
-          image: {{ .Values.csi.nodePlugin.driverRegistrar.image }}
+          image: {{ $.Values.global.azure.images.registrar.full | default .Values.csi.nodePlugin.driverRegistrar.image }}
           lifecycle:
             preStop:
               exec:

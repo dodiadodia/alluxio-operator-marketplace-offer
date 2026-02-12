@@ -9,12 +9,12 @@ global:
         image: k8s-operator
         registry: alluxio.azurecr.cn/alluxio
         full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      csi-provisioner:
+      provisioner:
         tag: v2.0.5
         image: csi-provisioner
         registry: alluxio.azurecr.cn/alluxio
         full: alluxio.azurecr.cn/alluxio/csi-provisioner:v2.0.5
-      node-driver-registrar:
+      registrar:
         tag: v2.0.0
         image: csi-node-driver-registrar
         registry: alluxio.azurecr.cn/alluxio
