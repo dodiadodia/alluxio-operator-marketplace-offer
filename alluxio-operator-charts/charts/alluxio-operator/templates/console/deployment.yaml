@@ -1,0 +1,157 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+{{- if .Values.console.enabled }}
+{{- $fullName := include "common.fullname" . }}
+{{- $image := include "alluxio-operator.image" . }}
+{{- $operatorConsoleLogDir := include "common.basePath" "/logs" }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-console
+  labels:
+    {{- include "common.labels" (dict "component" "console" "Chart" .Chart "Release" .Release "Values" .Values) | nindent 4 }}
+spec:
+  replicas: {{ .Values.console.count }}
+  selector:
+    matchLabels:
+      {{- include "common.matchLabels" (dict "component" "console" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.console.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "common.labels" (dict "component" "console" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 8 }}
+        {{- with .Values.console.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.console.hostAliases }}
+      hostAliases:
+        {{- toYaml .Values.console.hostAliases | trim | nindent 8 }}
+      {{- end }}
+      {{- with .Values.console.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.console.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.console.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.console.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range $name := . }}
+        - name: {{ $name }}
+      {{- end -}}
+      {{- end }}
+      serviceAccountName: {{ $fullName }}-console
+      containers:
+        - name: console
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.console.imagePullPolicy }}
+          command: ["/usr/local/bin/operator-console"]
+          args:
+            - "--config"
+            - "/etc/operator-console/operator-console.yaml"
+          env:
+            {{- range $key, $value := .Values.console.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+            {{- end }}
+          ports:
+            - name: api
+              containerPort: {{ .Values.console.service.ports.api }}
+          readinessProbe:
+            tcpSocket:
+              port: api
+            initialDelaySeconds: {{ .Values.console.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.console.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.console.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.console.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.console.readinessProbe.successThreshold }}
+          livenessProbe:
+            tcpSocket:
+              port: api
+            initialDelaySeconds: {{ .Values.console.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.console.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.console.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.console.livenessProbe.failureThreshold }}
+          startupProbe:
+            tcpSocket:
+              port: api
+            initialDelaySeconds: {{ .Values.console.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.console.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.console.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.console.startupProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.console.resources | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/operator-console
+            - name: log-volume
+              mountPath: {{ $operatorConsoleLogDir }}
+            {{- if .Values.console.secrets }}
+            {{- include "common.volumeMounts" (dict "volumeMounts" .Values.console.secrets "readOnly" true) | indent 12 }}
+            {{- end }}
+            {{- if .Values.console.configMaps }}
+            {{- include "common.volumeMounts" (dict "volumeMounts" .Values.console.configMaps "readOnly" true) | indent 12 }}
+            {{- end }}
+            {{- if .Values.console.hostPaths }}
+            {{- include "common.volumeMounts" (dict "volumeMounts" .Values.console.hostPaths "readOnly" false) | indent 12 }}
+            {{- end }}
+            {{- if .Values.console.pvcMounts }}
+            {{- include "common.volumeMounts" (dict "volumeMounts" .Values.console.pvcMounts "readOnly" false) | indent 12 }}
+            {{- end }}
+            {{- if (ternary .Values.global.useLocaltime .Values.useLocaltime (hasKey .Values.global "useLocaltime")) }}
+            - name: system-localtime
+              mountPath: /etc/localtime
+            {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ $fullName }}-console
+        - name: log-volume
+        {{- if eq .Values.console.log.type "persistentVolumeClaim" }}
+          persistentVolumeClaim:
+            claimName: {{ $fullName }}-console-log
+        {{- else if eq .Values.console.log.type "hostPath" }}
+          hostPath:
+            path: {{ .Values.console.log.hostPath }}
+            type: DirectoryOrCreate
+        {{- else }}
+          emptyDir: { }
+        {{- end }}
+        {{- if .Values.console.secrets }}
+        {{- include "common.secretVolumes" .Values.console.secrets | indent 8 }}
+        {{- end }}
+        {{- if .Values.console.configMaps }}
+        {{- include "common.configMapVolumes" .Values.console.configMaps | indent 8 }}
+        {{- end }}
+        {{- if .Values.console.hostPaths }}
+        {{- include "common.console.hostPathVolumes" .Values.console.hostPaths | indent 8 }}
+        {{- end }}
+        {{- if .Values.console.pvcMounts }}
+        {{- include "common.pvcVolumes" .Values.console.pvcMounts | indent 8 }}
+        {{- end }}
+        {{- if (ternary .Values.global.useLocaltime .Values.useLocaltime (hasKey .Values.global "useLocaltime")) }}
+        - name: system-localtime
+          hostPath:
+            path: /etc/localtime
+            type: File
+        {{- end }}
+{{- end }} 

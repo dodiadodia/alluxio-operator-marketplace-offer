@@ -1,0 +1,109 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+{{- $fullName := include "common.fullname" . }}
+{{- $_ := mergeOverwrite .Values.csi (index .Values "alluxio-csi") }}
+
+{{- if .Values.csi.enabled }}
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ $fullName }}-csi-controller
+  labels:
+    {{- include "common.labels" (dict "component" "csi-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "common.matchLabels" (dict "component" "csi-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" (dict "component" "csi-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 8 }}
+    spec:
+      serviceAccountName: alluxio-csi-sa
+      hostNetwork: {{ .Values.csi.hostNetwork }}
+      dnsPolicy: {{ .Values.csi.dnsPolicy | default (.Values.csi.hostNetwork | ternary "ClusterFirstWithHostNet" "ClusterFirst") }}
+      {{- include "alluxio-operator.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.csi.controllerPlugin.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.csi.controllerPlugin.nodeSelector | trim | nindent 8 }}
+      {{- end }}
+      {{- if .Values.csi.controllerPlugin.affinity }}
+      affinity:
+        {{- toYaml .Values.csi.controllerPlugin.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.csi.controllerPlugin.tolerations }}
+      tolerations:
+        {{- toYaml .Values.csi.controllerPlugin.tolerations | trim | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: csi-controller
+          image: {{ include "alluxio-operator.image" . }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ["/usr/local/bin/alluxio-csi"]
+          args:
+            - controller
+            - "--nodeid=$(NODE_ID)"
+            - "--endpoint=$(CSI_ENDPOINT)"
+            {{- if .Values.csi.controllerPlugin.controller.debugLog }}
+            - "--debug-log"
+            {{- end }}
+            {{- if .Values.csi.useFixedStagingPath }}
+            - "--fixed-staging"
+            {{- end }}
+          env:
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CSI_ENDPOINT
+              value: unix://csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+            {{- if .Values.useLocaltime }}
+            - name: system-localtime
+              mountPath: /etc/localtime
+            {{- end }}
+          {{- if .Values.csi.controllerPlugin.controller.resources }}
+          resources:
+            {{- toYaml .Values.csi.controllerPlugin.controller.resources | trim | nindent 12 }}
+          {{- end }}
+        - name: csi-provisioner
+          image: {{ .Values.csi.controllerPlugin.provisioner.image }}
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+            - "--timeout=60s"
+            - "--volume-name-prefix=alluxio"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+          {{- if .Values.csi.controllerPlugin.provisioner.resources }}
+          resources:
+            {{- toYaml .Values.csi.controllerPlugin.provisioner.resources | trim | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: socket-dir
+          emptyDir: {}
+        {{- if .Values.useLocaltime }}
+        - name: system-localtime
+          hostPath:
+            path: /etc/localtime
+            type: File
+        {{- end }}
+
+{{- end }}

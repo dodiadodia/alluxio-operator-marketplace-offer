@@ -1,0 +1,21 @@
+apiVersion: v2
+dependencies:
+- name: common
+  repository: file://../common
+  version: 3.4.5
+- condition: fdb-operator.enabled
+  name: fdb-operator
+  repository: file://../fdb-operator
+  version: 0.2.0
+description: Empower AI builders with a fast, scalable, and reliable compute & data
+  infrastructure.
+home: https://www.alluxio.io/
+maintainers:
+- email: jiacheng@alluxio.com
+  name: Jiacheng Liu
+- email: jiasen.sun@alluxio.com
+  name: Jiasen Sun
+- email: kai.zhang@alluxio.com
+  name: Kai Zhang
+name: alluxio-operator
+version: 3.4.5

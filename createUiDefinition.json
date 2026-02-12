@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Azure.CreateUIDef",
+  "version": "0.1.2-preview",
+
+  "parameters": {
+    "config": {
+      "isWizard": false,
+      "basics": {
+        "subscription": {
+          "constraints": {
+            "required": true
+          }
+        },
+        "resourceGroup": {
+          "allowExisting": true
+        },
+        "location": {
+          "visible": false
+        }
+      }
+    },
+
+    "basics": [],
+    "steps": [
+      {
+        "name": "AlluxioOperatorSettings",
+        "label": "Alluxio Operator Configuration",
+        "elements": [
+          {
+						"name": "extensionResourceName",
+						"type": "Microsoft.Common.TextBox",
+						"label": "Cluster extension resource name",
+						"defaultValue": "alluxio-operator-extension",
+						"toolTip": "Only lowercase alphanumeric characters are allowed, and the value must be 6-30 characters long.",
+						"constraints": {
+							"required": true,
+							"regex": "^[a-z0-9]{6,30}$",
+							"validationMessage": "Only lowercase alphanumeric characters are allowed, and the value must be 6-30 characters long."
+						},
+						"visible": true
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "extensionResourceName": "[steps('AlluxioOperatorSettings').extensionResourceName]"
+    }
+  }
+}
+

@@ -1,0 +1,60 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+# The following value should not be modified in the usual case.
+
+nameOverride: ""
+fullnameOverride: alluxio
+
+image: foundationdb/fdb-kubernetes-operator
+imageTag: v2.13.0
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+initContainers:
+  image: foundationdb/fdb-kubernetes-monitor
+  imageTag: 7.3.63
+  imagePullPolicy: IfNotPresent
+  version: 7.3
+globalMode:
+  enabled: false
+count: 1
+annotations: {}
+podAnnotations: {}
+podLabels: {}
+serviceAccount:
+  create: true
+  name: null
+  imagePullSecrets: []
+  annotations: {}
+priorityClassName: null
+securityContext:
+  runAsUser: 4059
+  runAsGroup: 4059
+  fsGroup: 4059
+containerSecurityContext: {}
+nodeSelector: {}
+affinity: {}
+tolerations: {}
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 500m
+    memory: 256Mi
+initContainersResources:
+  limits:
+    cpu: 10m
+    memory: 50Mi
+  requests:
+    cpu: 10m
+    memory: 50Mi
+initContainerSecurityContext: {}

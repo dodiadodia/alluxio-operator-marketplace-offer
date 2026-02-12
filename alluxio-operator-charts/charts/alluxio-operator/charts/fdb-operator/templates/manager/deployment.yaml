@@ -1,0 +1,140 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+{{- $fullName := include "common.fullname" . }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-fdb-controller
+  labels:
+    {{- include "common.labels" (dict "component" "fdb-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.count }}
+  selector:
+    matchLabels:
+      {{- include "common.matchLabels" (dict "component" "fdb-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" (dict "component" "fdb-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "fdb-operator.serviceAccountName" . }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      {{- if .Values.imagePullSecrets }}
+      {{- include "common.imagePullSecrets" .Values | nindent 6 }}
+      {{- end }}
+      initContainers:
+      - name: foundationdb-kubernetes-init
+        image: {{ .Values.initContainers.image }}:{{ .Values.initContainers.imageTag }}
+        imagePullPolicy: {{ .Values.initContainers.imagePullPolicy }}
+        args:
+        - "--copy-library"
+        - "{{ .Values.initContainers.version }}"
+        - "--copy-binary"
+        - "fdbcli"
+        - "--copy-binary"
+        - "fdbbackup"
+        - "--copy-binary"
+        - "fdbrestore"
+        - "--output-dir"
+        - "/var/output-files"
+        - "--mode"
+        - "init"
+        volumeMounts:
+        - name: fdb-binaries
+          mountPath: /var/output-files
+        resources:
+          {{- toYaml .Values.initContainersResources | nindent 10 }}
+        securityContext:
+          {{- if .Values.initContainerSecurityContext }}
+          {{- toYaml .Values.initContainerSecurityContext | nindent 10 }}
+          {{- end }}
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+              - all
+          readOnlyRootFilesystem: true
+      containers:
+      - name: manager
+        image: {{ .Values.image }}:{{ .Values.imageTag }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command:
+        - /manager
+        {{- if not .Values.globalMode.enabled }}
+        env:
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        {{- end }}
+        ports:
+        - containerPort: 8080
+          name: metrics
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: logs
+          mountPath: /var/log/fdb
+        - name: fdb-binaries
+          mountPath: /usr/bin/fdb
+        securityContext:
+          {{- if .Values.containerSecurityContext }}
+          {{- toYaml .Values.containerSecurityContext | nindent 10 }}
+          {{- end }}
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+              - all
+          readOnlyRootFilesystem: true
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      # /tmp is required because the container runs with readOnlyRootFilesystem=true.
+      # A writable emptyDir allows /tmp access while keeping the rest of the FS read-only.
+      # Related PR: https://github.com/FoundationDB/fdb-kubernetes-operator/pull/425
+      - name: tmp
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+      - name: fdb-binaries
+        emptyDir: {}

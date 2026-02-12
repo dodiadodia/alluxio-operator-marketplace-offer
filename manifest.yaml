@@ -1,0 +1,19 @@
+{
+  "applicationName": "alluxio-operator-bundle",
+  "publisher": "alluxio",
+  "version": "1.0.0",
+  "displayName": "Alluxio Operator for AKS",
+  "description": "Alluxio Operator tools to deploy Alluxio on Azure Kubernetes Service",
+  "engine": "helm",
+  "helmChart": "./alluxio-operator-charts",
+
+  "clusterArmTemplate": "./arm-template.json",
+  "uiDefinition": "./createUiDefinition.json",
+  "registryServer": "alluxio.azurecr.io",
+
+  "extensionRegistrationParameters": {
+    "defaultScope": "cluster",
+    "namespace": "alluxio-operator",
+    "releaseTrain": "stable"
+  }
+}

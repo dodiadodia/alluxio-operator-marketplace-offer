@@ -1,0 +1,15 @@
+apiVersion: v2
+appVersion: v2.13.0
+dependencies:
+- name: common
+  repository: file://../common
+  version: 3.4.5
+description: A Helm chart for foundationDB operator
+home: https://www.foundationdb.org/
+maintainers:
+- name: foundationdb-ci
+name: fdb-operator
+sources:
+- https://github.com/FoundationDB/fdb-kubernetes-operator/tree/main/charts/fdb-operator
+type: application
+version: 0.2.0

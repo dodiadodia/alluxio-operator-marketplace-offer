@@ -1,0 +1,54 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+{{- $fullName := include "common.fullname" . }}
+
+apiVersion: rbac.authorization.k8s.io/v1
+{{- if .Values.globalMode.enabled }}
+kind: ClusterRoleBinding
+{{- else }}
+kind: RoleBinding
+{{- end }}
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "common.labels" (dict "component" "fdb-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  {{- if .Values.globalMode.enabled }}
+  kind: ClusterRole
+  {{- else }}
+  kind: Role
+  {{- end }}
+  name: {{ $fullName }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "fdb-operator.serviceAccountName" . }}
+  {{- if .Values.globalMode.enabled }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+{{- if .Values.nodeReadClusterRole }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $fullName }}-clusterrolebinding
+  labels:
+    {{- include "common.labels" (dict "component" "fdb-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $fullName }}-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: {{ include "fdb-operator.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

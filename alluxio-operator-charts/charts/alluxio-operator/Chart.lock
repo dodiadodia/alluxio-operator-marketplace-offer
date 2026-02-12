@@ -1,0 +1,9 @@
+dependencies:
+- name: common
+  repository: file://../common
+  version: 3.4.5
+- name: fdb-operator
+  repository: file://../fdb-operator
+  version: 0.2.0
+digest: sha256:4b617fd613eab6d319e4d8dd3d55eb8707162038c704216de545d5b82c0dce83
+generated: "2026-01-21T21:27:11.247844112-08:00"

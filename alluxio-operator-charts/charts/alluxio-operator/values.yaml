@@ -1,0 +1,242 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+# The following value should not be modified in the usual case.
+nameOverride: ""
+fullnameOverride: alluxio
+
+global:
+  image:
+  imageTag:
+  imagePullSecrets:
+
+nodeSelector:
+
+tolerations:
+
+useLocaltime: true
+
+image:
+imageTag:
+imagePullPolicy: IfNotPresent
+imagePullSecrets:
+
+clusterController:
+  debugLog: false
+  ports:
+    metric: 8080
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+ufsController:
+  debugLog: false
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+doctorController:
+  debugLog: false
+  ports:
+    metric: 8080
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 10m
+      memory: 1Gi
+  persistence:
+    # Type of the volume. Can be persistentVolumeClaim or hostPath.
+    type: hostPath
+    # Required for volume type of persistentVolumeClaim, ignored otherwise
+    size: 4Gi
+    # Required for volume type of hostPath, ignored otherwise
+    hostPath: /mnt/alluxio/doctor
+    # Required for volume type of persistentVolumeClaim, ignored otherwise
+    storageClass: "standard"
+    # Required for volume type of persistentVolumeClaim, ignored otherwise
+    accessModes: [ "ReadWriteOnce" ]
+
+licenseController:
+  debugLog: false
+  ports:
+    metric: 8080
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+csi:
+  enabled: true
+  hostNetwork: false
+  dnsPolicy:
+  kubeletPath: /var/lib/kubelet
+  useFixedStagingPath: false
+
+  controllerPlugin:
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    provisioner:
+      image: registry.k8s.io/sig-storage/csi-provisioner:v2.0.5
+      resources:
+        limits:
+          cpu: 100m
+          memory: 300Mi
+        requests:
+          cpu: 10m
+          memory: 20Mi
+    controller:
+      debugLog: false
+      resources:
+        limits:
+          cpu: 200m
+          memory: 200Mi
+        requests:
+          cpu: 10m
+          memory: 20Mi
+  nodePlugin:
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    nodeserver:
+      debugLog: false
+      ports:
+        metric: 8080
+      resources:
+        limits:
+          cpu: 200m
+          memory: 4Gi
+        requests:
+          cpu: 10m
+          memory: 1Gi
+    driverRegistrar:
+      image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.0.0
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+        requests:
+          cpu: 10m
+          memory: 20Mi
+
+console:
+  enabled: true
+  count: 1
+
+  image: alluxio/operator-console
+  imageTag: latest
+  imagePullPolicy: IfNotPresent
+
+  imagePullSecrets: []
+
+  # Service Account
+  # If not specified, 'default' ServiceAccount of the namespace shall be used for all Alluxio pods
+  serviceAccountName: ""
+
+  # HostAliases is an optional list of hostnames and IPs that will be injected into all pods,
+  # for providing the mapping between hostnames and IPs of services not in the K8s cluster, like HDFS.
+  # Example:
+  # hostAliases:
+  #   - ip: "192.168.0.1"
+  #     hostnames:
+  #       - "example1.com"
+  #       - "example2.com"
+  hostAliases: []
+
+  env: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  podAnnotations: {}
+
+  podLabels: {}
+
+  hostPaths:
+
+  pvcMounts:
+
+  configMaps:
+
+  secrets:
+
+  service:
+    annotations: {}
+    headless: false
+    type: ClusterIP
+    ports:
+      api: 80
+    nodePorts:
+      api: 30002
+    loadBalancerSourceRanges: []
+    externalIPs: []
+    externalName:
+
+  log:
+    level: info
+    type: emptyDir
+    hostPath: /mnt/alluxio/operator-console/logs
+    size: 1Gi
+    storageClass: standard
+
+  web:
+    authType: none
+    oktaIssuer: 
+    oktaClientID: 
+    issuerURL: 
+    clientID: 
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: "4Gi"
+    requests:
+      cpu: "1"
+      memory: "1Gi"
+
+  # Probes that do health checks on containers
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  livenessProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 2
+  startupProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 2
+
+fdb-operator:
+  enabled: false
+  globalMode:
+    enabled: true

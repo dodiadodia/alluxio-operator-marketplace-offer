@@ -1,0 +1,15 @@
+apiVersion: v2
+name: alluxio-operator-azure-bundle
+description: Alluxio Enterprise Operator for Azure Marketplace
+type: application
+version: 1.0.0
+appVersion: "3.4.5"
+
+dependencies:
+  # 这里定义子 Chart。
+  # 注意：在本地开发时，你可以将你的 .tgz 解压到 charts/alluxio-operator 目录
+  # 或者直接指向你的 .tgz 文件（如果未解压）
+  - name: alluxio-operator
+    version: "3.4.1"
+    repository: "file://./charts/alluxio-operator"
+    condition: alluxio-operator.enabled

@@ -1,0 +1,65 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+
+{{- $fullName := include "common.fullname" . }}
+{{- $image := include "alluxio-operator.image" . }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-ufs-controller
+  labels:
+    {{- include "common.labels" (dict "component" "ufs-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "common.matchLabels" (dict "component" "ufs-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 6 }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" (dict "component" "ufs-controller" "Release" .Release "Chart" .Chart "Values" .Values) | nindent 8 }}
+    spec:
+      serviceAccountName: alluxio-operator-sa
+      {{- include "alluxio-operator.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | trim | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | trim | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: ufs-controller
+          image: {{ $image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ["/usr/local/bin/ufs-controller"]
+          args:
+            {{- if .Values.ufsController.debugLog }}
+            - "--debug-log"
+            {{- end }}
+          {{- if .Values.ufsController.resources }}
+          resources:
+            {{- toYaml .Values.ufsController.resources | trim | nindent 12 }}
+          {{- end }}
+          {{- if (ternary .Values.global.useLocaltime .Values.useLocaltime (hasKey .Values.global "useLocaltime")) }}
+          volumeMounts:
+            - name: system-localtime
+              mountPath: /etc/localtime
+          {{- end }}
+      {{- if (ternary .Values.global.useLocaltime .Values.useLocaltime (hasKey .Values.global "useLocaltime")) }}
+      volumes:
+        - name: system-localtime
+          hostPath:
+            path: /etc/localtime
+            type: File
+      {{- end }}

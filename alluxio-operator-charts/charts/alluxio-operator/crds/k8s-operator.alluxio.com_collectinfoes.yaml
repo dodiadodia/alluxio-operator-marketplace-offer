@@ -1,0 +1,136 @@
+#
+# The Alluxio Open Foundation licenses this work under the Apache License, version 2.0
+# (the "License"). You may not use this work except in compliance with the License, which is
+# available at www.apache.org/licenses/LICENSE-2.0
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied, as more fully set forth in the License.
+#
+# See the NOTICE file distributed with this work for information regarding copyright ownership.
+#
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: collectinfoes.k8s-operator.alluxio.com
+spec:
+  group: k8s-operator.alluxio.com
+  names:
+    kind: CollectInfo
+    listKind: CollectInfoList
+    plural: collectinfoes
+    singular: collectinfo
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.lastScheduleTime
+      name: LastScheduleTime
+      type: string
+    - jsonPath: .status.lastSuccessfulTime
+      name: LastSuccessfulTime
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: CollectInfo is the Schema for the CollectInfos API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CollectInfoSpec defines the desired state of CollectInfo
+            properties:
+              alluxioCluster:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  type: object
+                type: array
+              logs:
+                properties:
+                  sinceSeconds:
+                    format: int64
+                    type: integer
+                  sinceTime:
+                    format: date-time
+                    type: string
+                  tail:
+                    description: |-
+                      If tail is not specified, logs are shown from container creation time
+                      or sinceSeconds or sinceTime if provided.
+                      Only one of sinceSeconds or sinceTime may be specified.
+                      Reference: https://pkg.go.dev/k8s.io/api/core/v1#PodLogOptions
+                    format: int64
+                    type: integer
+                type: object
+              metrics:
+                properties:
+                  duration:
+                    type: string
+                  step:
+                    type: string
+                type: object
+              scheduled:
+                properties:
+                  cron:
+                    type: string
+                  enabled:
+                    type: boolean
+                  expiration:
+                    type: string
+                  timeZone:
+                    type: string
+                type: object
+              type:
+                items:
+                  type: string
+                type: array
+              upload:
+                properties:
+                  account:
+                    type: string
+                  awsKey:
+                    type: string
+                  awsSecret:
+                    type: string
+                  productionId:
+                    type: string
+                type: object
+            type: object
+          status:
+            description: CollectInfoStatus defines the observed state of CollectInfo
+            properties:
+              lastScheduleTime:
+                format: date-time
+                type: string
+              lastSuccessfulTime:
+                format: date-time
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
