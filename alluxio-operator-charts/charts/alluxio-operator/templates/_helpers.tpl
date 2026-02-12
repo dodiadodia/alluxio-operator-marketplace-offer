@@ -6,12 +6,13 @@ either express or implied, as more fully set forth in the License.
 See the NOTICE file distributed with this work for information regarding copyright ownership. */}}
 
 {{- define "alluxio-operator.image" -}}
-{{- $image := .Values.global.image | default .Values.image }}
-{{- $imageTag := .Values.global.imageTag | default .Values.imageTag }}
+{{- $registry := $.Values.global.azure.images.operator.registry }}
+{{- $image := $.Values.global.azure.images.operator.image | default .Values.image }}
+{{- $imageTag := $.Values.global.azure.images.operator.tag | default .Values.imageTag }}
 {{- if not (and $image $imageTag) }}
 {{ fail "Error: image and imageTag must be set" }}
 {{- end }}
-{{- printf "%s:%s" $image $imageTag }}
+{{- printf "%s/%s:%s" $registry $image $imageTag }}
 {{- end -}}
 
 {{- define "alluxio-operator.imagePullSecrets" -}}

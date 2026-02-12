@@ -19,51 +19,7 @@ global:
         image: csi-node-driver-registrar
         registry: alluxio.azurecr.cn/alluxio
         full: alluxio.azurecr.cn/alluxio/csi-node-driver-registrar:v2.0.0
-      csi-nodeserver:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      doctor-controller:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      cluster-controller:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      ufs-controller:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      license-controller:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      console:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      csi-controller:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      foundationdb-kubernetes-init:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
-      manifest:
-        tag: 3.4.5
-        image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
+
 
 # ========================================================================
 # Alluxio Operator Configuration (Sub-Chart Pass-through)
