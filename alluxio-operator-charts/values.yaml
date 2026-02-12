@@ -7,18 +7,18 @@ global:
       operator:
         tag: 3.4.5
         image: k8s-operator
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/k8s-operator:3.4.5
+        registry: alluxio.azurecr.io/alluxio
+        full: alluxio.azurecr.io/alluxio/k8s-operator:3.4.5
       provisioner:
         tag: v2.0.5
         image: csi-provisioner
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/csi-provisioner:v2.0.5
+        registry: alluxio.azurecr.io/alluxio
+        full: alluxio.azurecr.io/alluxio/csi-provisioner:v2.0.5
       registrar:
         tag: v2.0.0
         image: csi-node-driver-registrar
-        registry: alluxio.azurecr.cn/alluxio
-        full: alluxio.azurecr.cn/alluxio/csi-node-driver-registrar:v2.0.0
+        registry: alluxio.azurecr.io/alluxio
+        full: alluxio.azurecr.io/alluxio/csi-node-driver-registrar:v2.0.0
 
 
 # ========================================================================
