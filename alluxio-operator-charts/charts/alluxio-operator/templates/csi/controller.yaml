@@ -80,7 +80,7 @@ spec:
             {{- toYaml .Values.csi.controllerPlugin.controller.resources | trim | nindent 12 }}
           {{- end }}
         - name: csi-provisioner
-          image: {{ $.Values.global.azure.images.provisioner.full | default .Values.csi.controllerPlugin.provisioner.image }}
+          image: {{ $.Values.global.azure.images.provisioner.registry }}/{{ $.Values.global.azure.images.provisioner.image }}:{{ $.Values.global.azure.images.provisioner.tag }}
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
