@@ -28,11 +28,6 @@ alluxio-operator:
   enabled: true
   # 在这里覆盖子 Chart alluxio-operator 的 values
   # 例如：
-  image: alluxio.azurecr.cn/alluxio/k8s-operator
-  imageTag: 3.4.5
-  imagePullPolicy: IfNotPresent
-  imagePullSecrets:
-  
   console:
     web:
       authType: none
@@ -67,11 +62,3 @@ alluxio-operator:
   csi:
     enabled: true
     fullnameOverride: alluxio
-  
-    controllerPlugin:
-      provisioner:
-        image: alluxio.azurecr.cn/alluxio/csi-provisioner:v2.0.5
-  
-    nodePlugin:
-      driverRegistrar:
-        image: alluxio.azurecr.cn/alluxio/csi-node-driver-registrar:v2.0.0
