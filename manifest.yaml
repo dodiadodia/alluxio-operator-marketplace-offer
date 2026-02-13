@@ -1,5 +1,5 @@
 {
-  "applicationName": "alluxio-operator-bundle",
+  "applicationName": "alluxio-operator-extension",
   "publisher": "alluxio",
   "version": "1.0.0",
   "displayName": "Alluxio Operator for AKS",
