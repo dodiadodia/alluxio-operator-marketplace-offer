@@ -1,7 +1,7 @@
 {
   "applicationName": "alluxio-operator-extension",
   "publisher": "alluxio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Alluxio Operator for AKS",
   "description": "Alluxio Operator tools to deploy Alluxio on Azure Kubernetes Service",
   "engine": "helm",
