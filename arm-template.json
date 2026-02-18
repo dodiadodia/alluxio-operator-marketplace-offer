@@ -3,24 +3,31 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "extensionResourceName": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "The name of the extension."
+      }
+    },
+    "clusterResourceName": {
+      "type": "String",
+      "metadata": {
+        "description": "The name of the Managed Cluster resource."
+      }
     }
   },
-
   "variables": {
-    "plan-name": "DONOTMODIFY",
-    "plan-publisher": "DONOTMODIFY",
-    "plan-offerID": "DONOTMODIFY",
-    "releaseTrain": "sDONOTMODIFY",
-    "clusterExtensionTypeName": "DONOTMODIFY"
+    "plan-name": "alluxio-operator",
+    "plan-publisher": "alluxio1770783070184",
+    "plan-offerID": "alluxio_operator",
+    "releaseTrain": "stable",
+    "clusterExtensionTypeName": "alluxio1770783070184.alluxio_operator"
   },
-
   "resources": [
     {
       "type": "Microsoft.KubernetesConfiguration/extensions",
       "apiVersion": "2023-05-01",
       "name": "[parameters('extensionResourceName')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "scope": "[concat('Microsoft.ContainerService/managedClusters/', parameters('clusterResourceName'))]",
       "plan": {
         "name": "[variables('plan-name')]",
@@ -32,13 +39,9 @@
         "releaseTrain": "[variables('releaseTrain')]",
         "autoUpgradeMinorVersion": true,
         "configurationSettings": {
-          "clusterExtensionType": "[variables('clusterExtensionTypeName')]",
-          "releaseTrain": "[variables('releaseTrain')]"
         },
-        "configurationProtectedSettings": {
-        }
+        "configurationProtectedSettings": {}
       }
     }
   ]
 }
-
