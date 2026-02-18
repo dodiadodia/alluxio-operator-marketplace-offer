@@ -20,7 +20,7 @@
     "plan-publisher": "alluxio1770783070184",
     "plan-offerID": "alluxio_operator",
     "releaseTrain": "stable",
-    "clusterExtensionTypeName": "alluxio1770783070184.alluxio_operator"
+    "clusterExtensionTypeName": "alluxio.alluxio-operator-extensions"
   },
   "resources": [
     {
