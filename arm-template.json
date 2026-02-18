@@ -13,6 +13,13 @@
       "metadata": {
         "description": "The name of the Managed Cluster resource."
       }
+    },
+    "targetNamespace": {
+      "type": "string",
+      "defaultValue": "default",
+      "metadata": {
+        "description": "The namespace where the application will be installed."
+      }
     }
   },
   "variables": {
@@ -37,9 +44,13 @@
       "properties": {
         "extensionType": "[variables('clusterExtensionTypeName')]",
         "releaseTrain": "[variables('releaseTrain')]",
-        "autoUpgradeMinorVersion": true,
-        "configurationSettings": {
+        "scope": {
+          "cluster": {
+            "releaseNamespace": "[parameters('targetNamespace')]"
+          }
         },
+        "autoUpgradeMinorVersion": true,
+        "configurationSettings": {},
         "configurationProtectedSettings": {}
       }
     }

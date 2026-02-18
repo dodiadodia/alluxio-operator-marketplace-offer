@@ -2,7 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
   "handler": "Microsoft.Azure.CreateUIDef",
   "version": "0.1.2-preview",
-
   "parameters": {
     "config": {
       "isWizard": false,
@@ -20,38 +19,37 @@
         }
       }
     },
-
     "basics": [],
     "steps": [
       {
-				"name": "clusterDetails",
-				"label": "Cluster Details",
-				"elements": [
-					{
-						"name": "existingClusterSection",
-						"type": "Microsoft.Common.Section",
-						"elements": [
-							{
-								"name": "clusterLookupControl",
-								"type": "Microsoft.Solutions.ArmApiControl",
-								"request": {
-									"method": "GET",
-									"path": "[concat(subscription().id, '/resourcegroups/', resourceGroup().name,  '/providers/Microsoft.ContainerService/managedClusters?api-version=2024-09-01')]"
-								}
-							},
-							{
-								"name": "existingClusterResourceName",
-								"type": "Microsoft.Common.DropDown",
-								"label": "AKS Cluster Name",
-								"toolTip": "AKS Cluster Resource Name",
-								"constraints": {
-									"allowedValues": "[map(steps('clusterDetails').existingClusterSection.clusterLookupControl.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
-									"required": true
-								}
-							}
-						],
-						"visible": true
-					}
+        "name": "clusterDetails",
+        "label": "Cluster Details",
+        "elements": [
+          {
+            "name": "existingClusterSection",
+            "type": "Microsoft.Common.Section",
+            "elements": [
+              {
+                "name": "clusterLookupControl",
+                "type": "Microsoft.Solutions.ArmApiControl",
+                "request": {
+                  "method": "GET",
+                  "path": "[concat(subscription().id, '/resourcegroups/', resourceGroup().name,  '/providers/Microsoft.ContainerService/managedClusters?api-version=2024-09-01')]"
+                }
+              },
+              {
+                "name": "existingClusterResourceName",
+                "type": "Microsoft.Common.DropDown",
+                "label": "AKS Cluster Name",
+                "toolTip": "AKS Cluster Resource Name",
+                "constraints": {
+                  "allowedValues": "[map(steps('clusterDetails').existingClusterSection.clusterLookupControl.value, (item) => parse(concat('{\"label\":\"', item.name, '\",\"value\":\"', item.name, '\"}')))]",
+                  "required": true
+                }
+              }
+            ],
+            "visible": true
+          }
         ]
       },
       {
@@ -59,25 +57,38 @@
         "label": "Alluxio Operator Configuration",
         "elements": [
           {
-						"name": "extensionResourceName",
-						"type": "Microsoft.Common.TextBox",
-						"label": "Cluster extension resource name",
-						"defaultValue": "alluxio-operator-instance",
-						"toolTip": "Only lowercase alphanumeric characters and hyphens are allowed. It must start and end with an alphanumeric character and be 6-30 characters long.",
-						"constraints": {
-							"required": true,
-							"regex": "^[a-z0-9][-a-z0-9]{4,28}[a-z0-9]$",
-							"validationMessage": "Only lowercase alphanumeric characters and hyphens are allowed. It must start and end with an alphanumeric character and be 6-30 characters long."
-						},
-						"visible": true
+            "name": "extensionResourceName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Cluster extension resource name",
+            "defaultValue": "alluxio-operator-instance",
+            "toolTip": "Only lowercase alphanumeric characters and hyphens are allowed. It must start and end with an alphanumeric character and be 6-30 characters long.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9][-a-z0-9]{4,28}[a-z0-9]$",
+              "validationMessage": "Only lowercase alphanumeric characters and hyphens are allowed. It must start and end with an alphanumeric character and be 6-30 characters long."
+            },
+            "visible": true
+          },
+          {
+            "name": "targetNamespace",
+            "label": "Target Namespace",
+            "type": "Microsoft.Common.TextBox",
+            "defaultValue": "alluxio-operator",
+            "toolTip": "The namespace where the application will be deployed.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "validationMessage": "Namespace must be a valid Kubernetes DNS label."
+            },
+            "visible": true
           }
         ]
       }
     ],
     "outputs": {
       "clusterResourceName": "[steps('clusterDetails').existingClusterSection.existingClusterResourceName]",
-      "extensionResourceName": "[steps('applicationDetails').extensionResourceName]"
+      "extensionResourceName": "[steps('applicationDetails').extensionResourceName]",
+      "targetNamespace": "[steps('applicationDetails').targetNamespace]"
     }
   }
 }
-
